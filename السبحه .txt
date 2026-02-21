@@ -1,0 +1,477 @@
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  runApp(const TasbihApp());
+}
+
+class TasbihApp extends StatelessWidget {
+  const TasbihApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'سبحة',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'serif',
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1a472a)),
+        useMaterial3: true,
+      ),
+      home: const TasbihScreen(),
+    );
+  }
+}
+
+class KaabaParticle {
+  Offset position;
+  Offset velocity;
+  double size;
+  double opacity;
+  double rotation;
+  double rotationSpeed;
+  Color color;
+
+  KaabaParticle({
+    required this.position,
+    required this.velocity,
+    required this.size,
+    required this.opacity,
+    required this.rotation,
+    required this.rotationSpeed,
+    required this.color,
+  });
+}
+
+class TasbihScreen extends StatefulWidget {
+  const TasbihScreen({super.key});
+
+  @override
+  State<TasbihScreen> createState() => _TasbihScreenState();
+}
+
+class _TasbihScreenState extends State<TasbihScreen>
+    with TickerProviderStateMixin {
+  int _count = 0;
+  int _totalCount = 0;
+  int _targetCount = 33;
+  List<KaabaParticle> _particles = [];
+  late AnimationController _particleController;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  bool _isAnimating = false;
+  final Random _random = Random();
+
+  final List<String> _phrases = [
+    'سُبْحَانَ اللَّهِ',
+    'الْحَمْدُ لِلَّهِ',
+    'اللَّهُ أَكْبَرُ',
+    'لَا إِلَهَ إِلَّا اللَّهُ',
+  ];
+  int _currentPhraseIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _particleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..addListener(() {
+        setState(() {
+          _updateParticles();
+        });
+      });
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _particleController.dispose();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  void _spawnParticles(Offset center) {
+    _particles.clear();
+    const int count = 20;
+    for (int i = 0; i < count; i++) {
+      final angle = (i / count) * 2 * pi + _random.nextDouble() * 0.5;
+      final speed = 150 + _random.nextDouble() * 250;
+      _particles.add(KaabaParticle(
+        position: center,
+        velocity: Offset(cos(angle) * speed, sin(angle) * speed),
+        size: 18 + _random.nextDouble() * 28,
+        opacity: 1.0,
+        rotation: _random.nextDouble() * pi,
+        rotationSpeed: (_random.nextDouble() - 0.5) * 8,
+        color: _getParticleColor(),
+      ));
+    }
+  }
+
+  Color _getParticleColor() {
+    final colors = [
+      const Color(0xFF1a472a),
+      const Color(0xFF2d6a4f),
+      const Color(0xFFc9a84c),
+      const Color(0xFFf0c040),
+      const Color(0xFF8B7355),
+      const Color(0xFF4a7c59),
+    ];
+    return colors[_random.nextInt(colors.length)];
+  }
+
+  void _updateParticles() {
+    final t = _particleController.value;
+    for (final p in _particles) {
+      p.position += p.velocity * 0.016;
+      p.velocity = Offset(p.velocity.dx * 0.95, p.velocity.dy * 0.95 + 2);
+      p.opacity = (1 - t).clamp(0.0, 1.0);
+      p.rotation += p.rotationSpeed * 0.016;
+    }
+    if (_particleController.value >= 1.0) {
+      _particles.clear();
+      _isAnimating = false;
+    }
+  }
+
+  void _onTap() {
+    HapticFeedback.lightImpact();
+
+    setState(() {
+      _count++;
+      _totalCount++;
+
+      if (_count >= _targetCount) {
+        _count = 0;
+        _currentPhraseIndex = (_currentPhraseIndex + 1) % _phrases.length;
+        HapticFeedback.heavyImpact();
+      }
+    });
+
+    _pulseController.forward().then((_) => _pulseController.reverse());
+
+    // Spawn particles from center of screen
+    final size = MediaQuery.of(context).size;
+    _spawnParticles(Offset(size.width / 2, size.height * 0.45));
+    _isAnimating = true;
+    _particleController.forward(from: 0);
+  }
+
+  void _reset() {
+    setState(() {
+      _count = 0;
+    });
+    HapticFeedback.mediumImpact();
+  }
+
+  void _resetAll() {
+    setState(() {
+      _count = 0;
+      _totalCount = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF0d1f14),
+      body: Stack(
+        children: [
+          // Background pattern
+          Positioned.fill(
+            child: CustomPaint(
+              painter: BackgroundPainter(),
+            ),
+          ),
+
+          // Particles
+          if (_isAnimating)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: ParticlePainter(_particles),
+              ),
+            ),
+
+          // Main content
+          SafeArea(
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'المجموع: $_totalCount',
+                        style: const TextStyle(
+                          color: Color(0xFFc9a84c),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Text(
+                        '✦ سبحة ✦',
+                        style: TextStyle(
+                          color: Color(0xFFf0c040),
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _resetAll,
+                        child: const Text(
+                          'إعادة',
+                          style: TextStyle(
+                            color: Color(0xFF8B7355),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Phrase display
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFc9a84c), width: 1),
+                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF1a472a).withOpacity(0.3),
+                  ),
+                  child: Text(
+                    _phrases[_currentPhraseIndex],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFFf0e6c0),
+                      fontSize: 26,
+                      height: 1.8,
+                    ),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+
+                // Count display
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$_count',
+                          style: TextStyle(
+                            color: _count >= _targetCount - 1
+                                ? const Color(0xFFf0c040)
+                                : const Color(0xFFf0e6c0),
+                            fontSize: 100,
+                            fontWeight: FontWeight.w200,
+                            height: 1,
+                          ),
+                        ),
+                        Text(
+                          '/ $_targetCount',
+                          style: const TextStyle(
+                            color: Color(0xFF8B7355),
+                            fontSize: 22,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Main Tasbih button
+                GestureDetector(
+                  onTap: _onTap,
+                  child: AnimatedBuilder(
+                    animation: _pulseAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _pulseAnimation.value,
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const RadialGradient(
+                              colors: [
+                                Color(0xFF2d6a4f),
+                                Color(0xFF1a472a),
+                                Color(0xFF0d2b18),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: const Color(0xFFc9a84c),
+                              width: 2.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFc9a84c).withOpacity(0.3),
+                                blurRadius: 30,
+                                spreadRadius: 5,
+                              ),
+                              BoxShadow(
+                                color: const Color(0xFF1a472a).withOpacity(0.8),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '🕋',
+                              style: TextStyle(fontSize: 80),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Progress bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: _count / _targetCount,
+                          backgroundColor: const Color(0xFF1a3320),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFFc9a84c),
+                          ),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Reset round button
+                GestureDetector(
+                  onTap: _reset,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF3d6b4f)),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'تصفير الجولة',
+                      style: TextStyle(color: Color(0xFF8B9B8E), fontSize: 14),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF1a472a).withOpacity(0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    // Islamic geometric pattern - simple grid of diamonds
+    const spacing = 60.0;
+    for (double x = 0; x < size.width + spacing; x += spacing) {
+      for (double y = 0; y < size.height + spacing; y += spacing) {
+        final path = Path();
+        path.moveTo(x, y - 20);
+        path.lineTo(x + 20, y);
+        path.lineTo(x, y + 20);
+        path.lineTo(x - 20, y);
+        path.close();
+        canvas.drawPath(path, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class ParticlePainter extends CustomPainter {
+  final List<KaabaParticle> particles;
+
+  ParticlePainter(this.particles);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final p in particles) {
+      if (p.opacity <= 0) continue;
+
+      canvas.save();
+      canvas.translate(p.position.dx, p.position.dy);
+      canvas.rotate(p.rotation);
+
+      // Draw Kaaba shape (black square with gold trim)
+      final kaabaSize = p.size;
+      final paint = Paint()
+        ..color = p.color.withOpacity(p.opacity)
+        ..style = PaintingStyle.fill;
+
+      // Main body
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset.zero, width: kaabaSize, height: kaabaSize),
+        paint,
+      );
+
+      // Gold border
+      final borderPaint = Paint()
+        ..color = const Color(0xFFc9a84c).withOpacity(p.opacity * 0.8)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5;
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset.zero, width: kaabaSize, height: kaabaSize),
+        borderPaint,
+      );
+
+      // Gold band (kiswa)
+      final bandPaint = Paint()
+        ..color = const Color(0xFFf0c040).withOpacity(p.opacity * 0.7)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(0, -kaabaSize * 0.15),
+          width: kaabaSize,
+          height: kaabaSize * 0.15,
+        ),
+        bandPaint,
+      );
+
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
