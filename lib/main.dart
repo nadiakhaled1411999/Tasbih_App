@@ -3,8 +3,12 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await SentryFlutter.init(
     (options) {
+      options.enableNativeCrashHandling =
+          false; 
+      options.enableAutoSessionTracking = true;
       options.dsn =
           "https://9a917d5415ac12ea0a30227662d5c872@o4510938098171904.ingest.us.sentry.io/4510938117767168";
     },
