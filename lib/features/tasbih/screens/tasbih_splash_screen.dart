@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:tasbih_app/core/constants/tasbih_constants.dart';
+import 'package:tasbih_app/features/tasbih/screens/tasbih_screen.dart';
 import 'dart:async';
 
-import 'package:tasbih_app/features/tasbih/screens/test_sentry.dart';
 
-class SentrySplashScreen extends StatefulWidget {
-  const SentrySplashScreen({super.key});
+
+class TasbihSplashScreen extends StatefulWidget {
+  const TasbihSplashScreen({super.key});
 
   @override
-  State<SentrySplashScreen> createState() => _SentrySplashScreenState();
+  State<TasbihSplashScreen> createState() => _TasbihSplashScreenState();
 }
 
-class _SentrySplashScreenState extends State<SentrySplashScreen> {
+class _TasbihSplashScreenState extends State<TasbihSplashScreen> {
   double _opacity = 0.0;
 
   @override
@@ -25,12 +27,10 @@ class _SentrySplashScreenState extends State<SentrySplashScreen> {
       }
     });
 
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 6), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) =>  const TestSentry()
-          ),
+          MaterialPageRoute(builder: (context) => const TasbihScreen()),
         );
       }
     });
@@ -39,7 +39,7 @@ class _SentrySplashScreenState extends State<SentrySplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 78, 60, 105),
+      backgroundColor:  TasbihConstants.backgroundColor,
       body: Center(
         child: AnimatedOpacity(
           opacity: _opacity,
@@ -48,20 +48,20 @@ class _SentrySplashScreenState extends State<SentrySplashScreen> {
           child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.radar_rounded, size: 80, color: Colors.white),
+              Icon(Icons.radar_rounded, size: 80, color: TasbihConstants.textColor,),
               SizedBox(height: 20),
               Text(
-                'Sentry',
+                'بسم الله الرحمن الرحيم',
                 style: TextStyle(
-                  fontSize: 40,
+                  fontSize:20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: TasbihConstants.textColor,
                   letterSpacing: 2,
                 ),
               ),
               SizedBox(height: 10),
               Text(
-                'Observability Powered by Sentry',
+                'أذكر الله يذكرك',
                 style: TextStyle(fontSize: 16, color: Colors.white70),
               ),
             ],
