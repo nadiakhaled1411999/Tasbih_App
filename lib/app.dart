@@ -2,8 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tasbih_app/features/tasbih/screens/tasbih_splash_screen.dart';
-import 'package:tasbih_app/features/tasbih/screens/test_sentry.dart';
-import 'features/tasbih/screens/tasbih_screen.dart';
 
 class TasbihApp extends StatelessWidget {
   const TasbihApp({super.key});
