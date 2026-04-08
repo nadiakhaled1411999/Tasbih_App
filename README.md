@@ -111,7 +111,8 @@ The app uses a **CustomPainter** to render animated Kaaba particles:
 ## 📸 Screenshots
 
 ```
-![TasbihSplashScreen](https://github.com/user-attachments/assets/6a0e0e4d-74c7-4b00-9455-62c279e93a36)
+![TasbihSplashScreen](![tasbih_splash_screen](https://github.com/user-attachments/assets/1f5bf184-bd6d-43d2-9cdc-ebcd5df61e03)
+)
 
 ![Tasbih Screen](https://github.com/user-attachments/assets/5aa47239-756f-4eb6-97ab-e6e3da932c49)
 
