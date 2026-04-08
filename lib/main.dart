@@ -9,15 +9,15 @@ void main() async {
       options.dsn =
           "https://9a917d5415ac12ea0a30227662d5c872@o4510938098171904.ingest.us.sentry.io/4510938117767168";
 
-//       options.enableAutoSessionTracking = true;
-//       options.tracesSampleRate = 0.1;
-// //!
+      options.enableAutoSessionTracking = true;
+      options.tracesSampleRate = 0.1;
+//!
 
-//       options.replay.sessionSampleRate = 1.0;
-//       options.replay.onErrorSampleRate = 1.0;
+      options.replay.sessionSampleRate = 1.0;
+      options.replay.onErrorSampleRate = 1.0;
 
-//       options.privacy.maskAllText = false;
-//       options.privacy.maskAllImages = false;
+      options.privacy.maskAllText = false;
+      options.privacy.maskAllImages = false;
     },
     // Init your App.
     appRunner: () => runApp(
@@ -46,7 +46,7 @@ void main() async {
 //     await SentryFlutter.init(
 //       (options) {
 //         // Unique DSN link that connects your app to your Sentry project 🗺️
-//         options.dsn = "https://your_dsn_here@o000000.ingest.sentry.io/000000";
+//         options.dsn =   "https://9a917d5415ac12ea0a30227662d5c872@o4510938098171904.ingest.us.sentry.io/4510938117767168";
 
 //         // Enable session tracking to know how many users opened the app 🕵️‍♀️
 //         options.enableAutoSessionTracking = true;

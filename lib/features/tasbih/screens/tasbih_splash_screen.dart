@@ -3,6 +3,8 @@ import 'package:tasbih_app/core/constants/tasbih_constants.dart';
 import 'package:tasbih_app/features/tasbih/screens/tasbih_screen.dart';
 import 'dart:async';
 
+import 'package:tasbih_app/features/tasbih/screens/test_sentry.dart';
+
 
 
 class TasbihSplashScreen extends StatefulWidget {
