@@ -7,7 +7,8 @@ class TestSentry extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test Sentry'),
+        backgroundColor: const Color.fromARGB(255, 78, 60, 105),
+        title: const Text('Test Sentry', style: TextStyle(color: Colors.white)),
       ),
       body: Center(
           child: ElevatedButton(
